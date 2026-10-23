@@ -3,7 +3,9 @@
 <meta name="keywords" content="noozbar, noozbar scripts, Cronus ZEN, Cronus Zen scripts, GTA VI, GTA 5, RDR2, MOD, script GPC">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://noozbar.com/">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23060912'/%3E%3Ctext x='32' y='45' font-family='Segoe UI,Arial' font-weight='800' font-size='38' text-anchor='middle' fill='%233ad1ff'%3En%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" href="/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="theme-color" content="#060912">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="noozbar Scripts">
@@ -382,6 +384,15 @@ aside .nav-link .ext svg{width:14px;height:14px}
 body[data-mode="script"] .bloc-wrap:has(> .b-text.titre){margin-top:52px;padding-top:34px;border-top:1px solid rgba(var(--accent-rgb),.2)}
 body[data-mode="script"] .bloc-wrap:has(> .b-text.titre) > .b-text.titre{margin-top:0}
 @media(max-width:820px){body[data-mode="script"] .bloc-wrap:has(> .b-text.titre){margin-top:38px;padding-top:26px}}
+
+
+/* ---------------- LOGO À CÔTÉ DU NOM ---------------- */
+aside .brand-row{display:flex;align-items:center;gap:12px;padding:0 10px 20px}
+aside .brand-logo{width:48px;height:48px;flex:none;border-radius:50%;cursor:pointer;box-shadow:0 0 0 2px rgba(242,236,224,.8),0 0 14px rgba(var(--accent-rgb),.3);transition:transform .2s}
+aside .brand-logo:hover{transform:scale(1.06)}
+aside .brand-txt{min-width:0;flex:1}
+aside .brand-row .brand{padding:0;width:auto;font-size:1.3rem;letter-spacing:3px;line-height:1.2}
+aside .brand-row .brand-sub{padding:3px 0 0}
 </style>
 <script>document.documentElement.dataset.router='hash';</script>
 <canvas id="bgfx"></canvas>
@@ -412,13 +423,22 @@ body[data-mode="script"] .bloc-wrap:has(> .b-text.titre) > .b-text.titre{margin-
 
 <div class="layout">
   <aside id="sidebar">
-    <button class="brand" id="brand-home">NOOZBAR</button>
-    <div class="brand-sub" id="brand-sub">Scripts Premium</div>
+    <div class="brand-row">
+      <img class="brand-logo" src="media/logo-noozbar.png" alt="" width="48" height="48" onclick="document.getElementById('brand-home').click()">
+      <div class="brand-txt">
+        <button class="brand" id="brand-home">NOOZBAR</button>
+        <div class="brand-sub" id="brand-sub">Scripts Premium</div>
+      </div>
+    </div>
     <nav id="nav" aria-label="Menu principal"></nav>
     <div id="nav-foot"></div>
   </aside>
   <main id="main"></main>
 </div>
+
+
+
+
 
 
 
