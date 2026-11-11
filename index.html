@@ -623,6 +623,11 @@ html.barre-cachee #search-wrap:not(.open),html.barre-cachee #lang-sw{transform:t
 /* les titres atteints par le menu ou les bulles ne passent plus sous la barre du haut */
 main .bloc-wrap, main details, main summary, main .mod-fiche{scroll-margin-top:80px}
 @media(max-width:820px){main .bloc-wrap, main details, main summary, main .mod-fiche{scroll-margin-top:70px}}
+
+/* bouton Abonnement VIP en bas du menu */
+#nav-foot .nav-vip{margin-top:8px;color:#ffd34d;font-weight:800;border:1px solid rgba(242,182,49,.55);background:linear-gradient(90deg,rgba(242,182,49,.16),rgba(109,40,217,.18));box-shadow:0 0 14px rgba(242,182,49,.18)}
+#nav-foot .nav-vip svg{color:#ffd34d;stroke:#ffd34d}
+#nav-foot .nav-vip:hover,#nav-foot .nav-vip.active{color:#ffe27a;background:linear-gradient(90deg,rgba(242,182,49,.28),rgba(109,40,217,.28));border-color:rgba(242,182,49,.85)}
 </style>
 <script>document.documentElement.dataset.router='hash';</script>
 <canvas id="bgfx"></canvas>
@@ -1672,6 +1677,8 @@ function renderNavFoot(){
   let h = '';
   if(ap){ const p = routeOnglet(null, ap.id); h += `<a class="nav-link${(!activeScript && activeId===ap.id)?' active':''}" href="${H(p)}" data-nav="${p}">${svgIcon(ap.iconePersonnalisee||ap.icone)}<span class="nav-t">${touches(ap.titre)}</span></a>`; }
   if(dc && dc.lien){ h += `<a class="nav-link" ${attrsLien(dc.lien)}>${svgIcon(dc.iconePersonnalisee||dc.icone)}<span class="nav-t">${touches(dc.titre)}</span><span class="ext"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg></span></a>`; }
+  const ab = P.find(o=>o.id==='abonnement');
+  if(ab){ const p = routeOnglet(null, ab.id); h += `<a class="nav-link nav-vip${(!activeScript && activeId===ab.id)?' active':''}" href="${H(p)}" data-nav="${p}">${svgIcon('couronne')}<span class="nav-t">${touches(ab.titre)}</span></a>`; }
   foot.innerHTML = h;
 }
 document.addEventListener('click', e=>{
