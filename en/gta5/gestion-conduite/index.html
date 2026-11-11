@@ -1,8 +1,16 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8">
+<!doctype html><html lang="en" data-router="path"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Los Angeles — Driving &amp; Vehicles | noozbar Scripts</title>
 <meta name="description" content="How the script detects that you are in a vehicle to adapt the MODs, and how to resynchronize it if it gets out of sync.">
-<meta name="robots" content="noindex,follow">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://noozbar.com/en/gta5/">
+<link rel="alternate" hreflang="fr" href="https://noozbar.com/gta5/">
+<link rel="alternate" hreflang="en" href="https://noozbar.com/en/gta5/">
+<link rel="alternate" hreflang="x-default" href="https://noozbar.com/gta5/">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" href="/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#060912">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="noozbar Scripts">
 <meta property="og:locale" content="en_US">
@@ -14,10 +22,52 @@
 <meta name="twitter:title" content="Los Angeles — Driving &amp; Vehicles">
 <meta name="twitter:description" content="How the script detects that you are in a vehicle to adapt the MODs, and how to resynchronize it if it gets out of sync.">
 <meta name="twitter:image" content="https://noozbar.com/media/cartes/gta5.jpg">
-<meta name="theme-color" content="#060912">
-<link rel="icon" href="/favicon.ico" sizes="48x48">
-<meta http-equiv="refresh" content="0;url=/#/en/gta5/gestion-conduite/">
-<script>location.replace("/#/en/gta5/gestion-conduite/");</script>
-</head><body style="background:#060912;color:#cfe3ff;font-family:system-ui,sans-serif">
-<p style="margin:40px;text-align:center"><a href="/#/en/gta5/gestion-conduite/" style="color:#3ad1ff">Los Angeles — Driving &amp; Vehicles</a></p>
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<style>:root{color-scheme:dark}</style>
+<link rel="stylesheet" href="/assets/style.css">
+</head><body>
+<canvas id="bgfx"></canvas>
+
+<!-- Barre du haut (mobile uniquement) -->
+<header id="topbar">
+  <button id="burger" aria-label="Menu">
+    <svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+  <div class="topbar-title" id="topbar-title">NOOZBAR</div>
+</header>
+
+<!-- Voile sombre derrière le menu mobile -->
+<div id="overlay"></div>
+
+<!-- Choix de la langue (FR / EN) -->
+<div id="lang-sw" role="group" aria-label="Langue">
+  <button type="button" data-lang="fr" aria-label="Français" aria-pressed="true"><svg viewBox="0 0 3 2" aria-hidden="true"><rect width="1" height="2" fill="#0055A4"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#EF4135"/></svg><span>FR</span></button>
+  <button type="button" data-lang="en" aria-label="English" aria-pressed="false"><svg viewBox="0 0 60 40" aria-hidden="true"><rect width="60" height="40" fill="#012169"/><path d="M0 0L60 40M60 0L0 40" stroke="#fff" stroke-width="8"/><path d="M0 0L60 40M60 0L0 40" stroke="#C8102E" stroke-width="3"/><path d="M30 0V40M0 20H60" stroke="#fff" stroke-width="13"/><path d="M30 0V40M0 20H60" stroke="#C8102E" stroke-width="8"/></svg><span>EN</span></button>
+</div>
+
+<!-- Recherche (en haut à droite) -->
+<div id="search-wrap">
+  <button id="search-btn" type="button" aria-label="Rechercher"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+  <input id="search-input" type="search" placeholder="Rechercher…  ( / )" autocomplete="off" aria-label="Rechercher dans le site">
+  <div id="search-results" hidden></div>
+</div>
+
+<div class="layout">
+  <aside id="sidebar">
+    <div class="brand-row">
+      <img class="brand-logo" src="/media/logo-noozbar.png" alt="" width="48" height="48" onclick="document.getElementById('brand-home').click()">
+      <div class="brand-txt">
+        <button class="brand" id="brand-home">NOOZBAR</button>
+        <div class="brand-sub" id="brand-sub">Scripts Premium</div>
+      </div>
+    </div>
+    <nav id="nav" aria-label="Menu principal"></nav>
+    <div id="nav-foot"></div>
+  </aside>
+  <main id="main"></main>
+</div>
+<script src="/assets/fond.js"></script>
+<script src="/assets/site-data.js"></script>
+<script src="/assets/site-data.en.js"></script>
+<script src="/assets/app.js"></script>
 </body></html>
