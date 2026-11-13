@@ -22,6 +22,104 @@ const I18N = {
       enCours:'🚧 Translation in progress: this page has not been translated yet.', copier:'Copy link', copie:'Link copied!', copierAide:'Copy the link to this page to share it (Discord…)'}
 };
 function T(k){ return (I18N[LANG] || I18N.fr)[k]; }
+
+// ---- Simulateur Dynamic Sens (meme logique que le script : un pas = 10 ms) ----
+const DS_TXT = {
+  fr:{mvt:'Mouvement du stick', ex:'Exemples de réglage', origin:"Réglage d'origine", precise:'Visée précise, virage rapide', soft:'Accélération douce',
+      turn:'Poussé loin, puis ramené à mi-course', hold:'Stick maintenu à fond', fine:'Petits ajustements de visée',
+      nTurn:'0 à 1,5 s : stick poussé à 95 %. 1,5 à 2,4 s : stick ramené à mi-course, 55 % (la sensibilité garde sa valeur). Après 2,4 s : stick presque lâché (10 %).',
+      nHold:'Stick poussé à fond pendant 2,5 s, puis relâché.', nFine:'Petits mouvements entre 15 et 50 % de la course, comme pour ajuster une visée. Le stick ne dépasse pas 50 %.',
+      tilt:'Inclinaison du stick (votre pouce)', out:'Ce que reçoit le jeu', sens:'Sensibilité appliquée', course:'Course du stick',
+      rise:"Montée d'Initial à Max", speed:'Vitesse de montée', peak:'Sensibilité la plus haute atteinte', none:'aucune', s:'s', ps:'%/s',
+      zones:'Zones du stick', zBoost:'monte', zHold:'reste stable', zReset:'retour à Initial',
+      w1:'Restart Point est égal ou supérieur à Limit Point : la sensibilité ne peut pas monter.', w2:"Max Sens n'est pas au-dessus d'Initial Sens : la sensibilité reste fixe."},
+  en:{mvt:'Stick movement', ex:'Example settings', origin:'Default setting', precise:'Precise aim, fast turn', soft:'Gentle acceleration',
+      turn:'Pushed far, then brought back halfway', hold:'Stick held at full tilt', fine:'Small aim adjustments',
+      nTurn:'0 to 1.5 s: stick pushed to 95%. 1.5 to 2.4 s: stick brought back halfway, 55% (the sensitivity keeps its value). After 2.4 s: stick almost released (10%).',
+      nHold:'Stick pushed all the way for 2.5 s, then released.', nFine:'Small movements between 15 and 50% of travel, like fine-tuning your aim. The stick never goes past 50%.',
+      tilt:'Stick tilt (your thumb)', out:'What the game receives', sens:'Applied sensitivity', course:'Stick travel',
+      rise:'Rise from Initial to Max', speed:'Rise speed', peak:'Highest sensitivity reached', none:'none', s:'s', ps:'%/s',
+      zones:'Stick zones', zBoost:'rises', zHold:'stays stable', zReset:'back to Initial',
+      w1:'Restart Point is equal to or above Limit Point: the sensitivity cannot rise.', w2:'Max Sens is not above Initial Sens: the sensitivity stays fixed.'}
+};
+const DS_PRESETS = { origin:{initial:100,limit:100,restart:1,max:100,rate:1}, precise:{initial:80,limit:85,restart:30,max:140,rate:2}, soft:{initial:100,limit:70,restart:20,max:125,rate:4} };
+const DS_SCEN = {
+  turn:t=> t<150?95*t/150 : t<1500?95 : t<1600?95-40*(t-1500)/100 : t<2400?55 : t<2500?55-45*(t-2400)/100 : 10,
+  hold:t=> t<120?100*t/120 : t<2500?100 : t<2600?100-100*(t-2500)/100 : 0,
+  fine:t=> 32 + 18*Math.sin(t/260)*Math.cos(t/900)
+};
+const DS_KEYS = [['initial','Initial Sens',1,327,' %'],['limit','Limit Point',1,100,' %'],['restart','Restart Point',1,100,' %'],['max','Max Sens',1,327,' %'],['rate','Increase Rate',1,50,'']];
+function simDSHTML(){
+  const t = DS_TXT[LANG]||DS_TXT.fr;
+  return `<div class="sim-ds">
+  <div class="sim-ctl">
+    <label class="sim-l">${t.mvt}<select data-k="scen"><option value="turn">${t.turn}</option><option value="hold">${t.hold}</option><option value="fine">${t.fine}</option></select></label>
+    <div class="sim-l">${t.ex}<div class="sim-presets">${['origin','precise','soft'].map(p=>`<button type="button" data-p="${p}">${t[p]}</button>`).join('')}</div></div>
+    ${DS_KEYS.map(([k,n,mi,ma])=>`<label class="sim-l sim-r"><span>${n} <output data-o="${k}"></output></span><input type="range" data-k="${k}" min="${mi}" max="${ma}" step="1"></label>`).join('')}
+    <svg class="sim-zones" viewBox="0 0 220 220" role="img" aria-label="${t.zones}"></svg>
+  </div>
+  <div class="sim-graphs">
+    <div class="sim-legend"><span><i class="c-tilt"></i>${t.tilt}</span><span><i class="c-out"></i>${t.out}</span><span><i class="c-sens"></i>${t.sens}</span></div>
+    <svg class="sim-g1" viewBox="0 0 640 220" role="img" aria-label="${t.tilt}"></svg>
+    <svg class="sim-g2" viewBox="0 0 640 200" role="img" aria-label="${t.sens}"></svg>
+    <p class="sim-note"></p>
+    <div class="sim-read"><div><small>${t.rise}</small><b data-r="rise"></b></div><div><small>${t.speed}</small><b data-r="speed"></b></div><div><small>${t.peak}</small><b data-r="peak"></b></div></div>
+    <p class="sim-warn" role="status"></p>
+  </div></div>`;
+}
+function simDSInit(root){
+  if(root.dataset.init) return; root.dataset.init='1';
+  const t = DS_TXT[LANG]||DS_TXT.fr, loc = LANG==='en'?'en-US':'fr-FR', NS='http://www.w3.org/2000/svg';
+  const inp = k=>root.querySelector('[data-k="'+k+'"]');
+  const set = p=>DS_KEYS.forEach(([k])=>{ inp(k).value=p[k]; });
+  const vals = ()=>{ const v={}; DS_KEYS.forEach(([k])=>v[k]=parseInt(inp(k).value,10)); return v; };
+  const mk=(tag,at,par)=>{ const e=document.createElementNS(NS,tag); for(const k in at) e.setAttribute(k,at[k]); if(par) par.appendChild(e); return e; };
+  const tx=(par,x,y,s,anc)=>{ const e=mk('text',{x,y,'text-anchor':anc||'start','font-size':'12',class:'sim-txt'},par); e.textContent=s; return e; };
+  const L=46,R=622,TEND=3000,STEP=10,DZ=7, xs=v=>L+(R-L)*v/TEND;
+  function simulate(v,f){ let cur=v.initial,cnt=0; const out=[];
+    for(let tt=0;tt<=TEND;tt+=STEP){ const tilt=Math.max(0,Math.min(100,f(tt))); let o;
+      if(tilt<=DZ){ cur=v.initial; cnt=0; o=tilt; }
+      else{ if(tilt<v.restart){ cur=v.initial; cnt=0; }
+        if(tilt>=v.limit){ cnt+=STEP; if(cnt>=v.rate*10){ cnt=0; if(cur<v.max) cur++; } }
+        o=Math.min(100,tilt*cur/100); }
+      out.push({t:tt,tilt,sens:cur,out:o}); }
+    return out; }
+  const path=(svg,data,key,ys,cls)=>mk('path',{d:data.map((p,i)=>(i?'L':'M')+xs(p.t).toFixed(1)+' '+ys(p[key]).toFixed(1)).join(''),class:cls},svg);
+  function g1(svg,data,v){ svg.innerHTML=''; const T0=16,B=186,H=B-T0, ys=p=>B-H*p/100, lim=Math.min(v.limit,100), rs=Math.min(v.restart,100);
+    mk('rect',{x:L,y:ys(100),width:R-L,height:ys(lim)-ys(100),class:'z-boost'},svg);
+    if(rs<lim) mk('rect',{x:L,y:ys(lim),width:R-L,height:ys(rs)-ys(lim),class:'z-hold'},svg);
+    mk('rect',{x:L,y:ys(Math.min(rs,lim)),width:R-L,height:B-ys(Math.min(rs,lim)),class:'z-reset'},svg);
+    [0,25,50,75,100].forEach(p=>{ mk('line',{x1:L,x2:R,y1:ys(p),y2:ys(p),class:'sim-grid'},svg); tx(svg,L-8,ys(p)+4,p+'%','end'); });
+    mk('line',{x1:L,x2:R,y1:ys(lim),y2:ys(lim),class:'sim-lim'},svg); tx(svg,R-4,ys(lim)-5,'Limit '+v.limit,'end');
+    mk('line',{x1:L,x2:R,y1:ys(rs),y2:ys(rs),class:'sim-rst'},svg); tx(svg,R-4,ys(rs)+(rs>8?14:-5),'Restart '+v.restart,'end');
+    path(svg,data,'out',ys,'l-out'); path(svg,data,'tilt',ys,'l-tilt');
+    [0,1000,2000,3000].forEach(x=>tx(svg,xs(x),B+18,(x/1000)+' s','middle')); tx(svg,L,T0-4,t.course); }
+  function g2(svg,data,v){ svg.innerHTML=''; const T0=16,B=166,H=B-T0, top=Math.max(v.initial,v.max,100), lo=Math.min(v.initial,v.max,100);
+    const hi=Math.ceil((top+10)/25)*25, base=Math.max(0,Math.floor((lo-10)/25)*25), ys=s=>B-H*(s-base)/(hi-base), st=(hi-base)>150?50:25;
+    for(let s=base;s<=hi;s+=st){ mk('line',{x1:L,x2:R,y1:ys(s),y2:ys(s),class:'sim-grid'},svg); tx(svg,L-8,ys(s)+4,s+'%','end'); }
+    mk('line',{x1:L,x2:R,y1:ys(v.max),y2:ys(v.max),class:'sim-lim'},svg); tx(svg,R-4,ys(v.max)-5,'Max '+v.max,'end');
+    if(v.initial!==v.max){ mk('line',{x1:L,x2:R,y1:ys(v.initial),y2:ys(v.initial),class:'sim-rst'},svg); tx(svg,R-4,ys(v.initial)+14,'Initial '+v.initial,'end'); }
+    const d=data.map((p,i)=>(i?'L':'M')+xs(p.t).toFixed(1)+' '+ys(p.sens).toFixed(1)).join('');
+    mk('path',{d:d+'L'+R+' '+B+'L'+L+' '+B+'Z',class:'l-sens-fill'},svg); mk('path',{d,class:'l-sens'},svg);
+    [0,1000,2000,3000].forEach(x=>tx(svg,xs(x),B+18,(x/1000)+' s','middle')); tx(svg,L,T0-4,t.sens); }
+  function zones(svg,v){ svg.innerHTML=''; const c=110,rM=100, lim=Math.min(v.limit,100), rs=Math.min(v.restart,lim);
+    mk('circle',{cx:c,cy:c,r:rM,class:'z-boost zc'},svg); mk('circle',{cx:c,cy:c,r:rM*lim/100,class:'z-hold zc-lim'},svg);
+    mk('circle',{cx:c,cy:c,r:rM*rs/100,class:'z-reset zc-rst'},svg); mk('circle',{cx:c,cy:c,r:7,class:'zc-dot'},svg);
+    tx(svg,c,Math.max(14,c-rM*lim/100-6),'Limit '+v.limit+' %','middle'); if(rs>14) tx(svg,c,c+rM*rs/100-6,'Restart '+v.restart+' %','middle'); }
+  const nb=(x,d)=>x.toLocaleString(loc,{maximumFractionDigits:d});
+  function render(){ const v=vals(), sc=inp('scen').value;
+    DS_KEYS.forEach(([k,,,,u])=>{ root.querySelector('[data-o="'+k+'"]').textContent=v[k]+u; });
+    root.querySelector('.sim-note').textContent = t[{turn:'nTurn',hold:'nHold',fine:'nFine'}[sc]];
+    const data=simulate(v,DS_SCEN[sc]); g1(root.querySelector('.sim-g1'),data,v); g2(root.querySelector('.sim-g2'),data,v); zones(root.querySelector('.sim-zones'),v);
+    root.querySelector('[data-r="rise"]').textContent = v.max>v.initial ? nb((v.max-v.initial)*v.rate*10/1000,2)+' '+t.s : t.none;
+    root.querySelector('[data-r="speed"]').textContent = '+'+nb(100/v.rate,1)+' '+t.ps;
+    root.querySelector('[data-r="peak"]').textContent = data.reduce((m,p)=>Math.max(m,p.sens),0)+' %';
+    const w=[]; if(v.restart>=v.limit) w.push(t.w1); if(v.max<=v.initial) w.push(t.w2); root.querySelector('.sim-warn').textContent=w.join(' ');
+    root.querySelectorAll('[data-p]').forEach(b=>{ const p=DS_PRESETS[b.dataset.p]; b.setAttribute('aria-pressed', DS_KEYS.every(([k])=>p[k]===v[k])?'true':'false'); }); }
+  root.addEventListener('input',render); root.addEventListener('change',render);
+  root.addEventListener('click',e=>{ const b=e.target.closest('[data-p]'); if(!b) return; set(DS_PRESETS[b.dataset.p]); render(); });
+  set(DS_PRESETS.precise); render();
+}
 // ajoute le prefixe de langue a une route (/x/ -> /en/x/)
 function lp(path){ return (LANG==='en' && typeof path==='string' && path.startsWith('/') && !/^\/en(\/|$)/.test(path)) ? '/en' + path : path; }
 function langStocke(){ try{ return localStorage.getItem('lang'); }catch(e){ return null; } }
@@ -320,6 +418,9 @@ function renderBloc(b, ctx){
       html = `<div class="img-row">${(b.images||[]).map(im=>`<div class="b-card b-card-image"><img class="card-image-full" src="${esc(A(im.image))}" alt="${esc(im.alt||'Illustration')}" loading="lazy"></div>`).join('')}</div>`;
       break;
     }
+    case 'simulateur':
+      html = b.sim==='dynamic-sens' ? simDSHTML() : '';
+      break;
     case 'video':
       html = `<div class="b-video ${b.taille||'m'} ${b.align||'center'}">${videoInner(b)}</div>`;
       break;
@@ -1330,3 +1431,5 @@ document.addEventListener('click', e=>{
   const repli = ()=>{ const t=document.createElement('textarea'); t.value=url; t.style.position='fixed'; t.style.opacity='0'; document.body.appendChild(t); t.select(); try{ document.execCommand('copy'); }catch(err){} t.remove(); ok(); };
   if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(ok, repli); else repli();
 });
+
+new MutationObserver(()=>document.querySelectorAll('.sim-ds:not([data-init])').forEach(simDSInit)).observe(document.documentElement,{childList:true,subtree:true});

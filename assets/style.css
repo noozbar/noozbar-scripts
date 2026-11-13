@@ -612,3 +612,45 @@ main .bloc-wrap, main details, main summary, main .mod-fiche{scroll-margin-top:8
 .copie-lien:hover{color:var(--txt);border-color:rgba(var(--accent-rgb),.5);background:rgba(var(--accent-rgb),.14)}
 .copie-lien.ok{color:#6fe3a1;border-color:rgba(111,227,161,.6)}
 @media (max-width:700px){.copie-lien{padding:4px 10px;font-size:.72rem}}
+
+/* ---- Simulateur Dynamic Sens ---- */
+.sim-ds{--s-tilt:var(--accent);--s-out:#8ea6c8;--s-sens:#ff9f43;display:grid;grid-template-columns:260px minmax(0,1fr);gap:22px;margin:14px 0 6px;padding:18px;border:1px solid var(--line);border-radius:14px;background:rgba(6,10,24,.55);box-shadow:inset 0 0 30px rgba(var(--accent-rgb),.06)}
+.sim-ctl{display:grid;gap:12px;align-content:start}
+.sim-l{display:grid;gap:6px;font-size:.84rem;font-weight:600;color:var(--txt)}
+.sim-r span{display:flex;justify-content:space-between;gap:8px}
+.sim-r output{color:var(--accent);font-variant-numeric:tabular-nums;font-weight:700}
+.sim-ds input[type=range]{width:100%;accent-color:var(--accent)}
+.sim-ds select{font:inherit;font-size:.84rem;font-weight:500;padding:7px 9px;border-radius:9px;border:1px solid var(--line);background:rgba(var(--accent-rgb),.06);color:var(--txt)}
+.sim-ds select option{background:#0b1226}
+.sim-presets{display:flex;flex-wrap:wrap;gap:6px}
+.sim-presets button{font:inherit;font-size:.76rem;font-weight:600;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(var(--accent-rgb),.06);color:var(--txt-dim);cursor:pointer}
+.sim-presets button:hover{color:var(--txt);border-color:rgba(var(--accent-rgb),.5)}
+.sim-presets button[aria-pressed=true]{color:#fff;border-color:var(--accent);background:rgba(var(--accent-rgb),.18);box-shadow:0 0 10px rgba(var(--accent-rgb),.25)}
+.sim-zones{width:100%;max-width:190px;justify-self:center;margin-top:4px}
+.sim-graphs{display:grid;gap:8px;min-width:0}
+.sim-graphs svg{width:100%;height:auto;display:block}
+.sim-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.78rem;color:var(--txt-dim)}
+.sim-legend span{display:inline-flex;align-items:center;gap:6px}
+.sim-legend i{display:inline-block;width:18px;height:3px;border-radius:2px}
+.c-tilt{background:var(--s-tilt)}.c-out{background:var(--s-out)}.c-sens{background:var(--s-sens)}
+.sim-ds .sim-txt{fill:var(--txt-dim);font-family:inherit}
+.sim-ds .sim-grid{stroke:rgba(140,170,220,.14);stroke-width:1}
+.sim-ds .sim-lim{stroke:var(--s-sens);stroke-width:1.5;stroke-dasharray:5 4}
+.sim-ds .sim-rst{stroke:var(--txt-dim);stroke-width:1.5;stroke-dasharray:2 4}
+.sim-ds .z-boost{fill:rgba(255,159,67,.13)}.sim-ds .z-hold{fill:rgba(var(--accent-rgb),.10)}.sim-ds .z-reset{fill:rgba(140,170,220,.05)}
+.sim-ds .zc{stroke:var(--line)}.sim-ds .zc-lim{stroke:var(--s-sens);stroke-dasharray:5 4;stroke-width:1.5}.sim-ds .zc-rst{stroke:var(--txt-dim);stroke-dasharray:2 4;stroke-width:1.5}.sim-ds .zc-dot{fill:var(--txt)}
+.sim-ds .l-tilt{fill:none;stroke:var(--s-tilt);stroke-width:2.5;stroke-linejoin:round;filter:drop-shadow(0 0 4px rgba(var(--accent-rgb),.6))}
+.sim-ds .l-out{fill:none;stroke:var(--s-out);stroke-width:2.5;stroke-linejoin:round}
+.sim-ds .l-sens{fill:none;stroke:var(--s-sens);stroke-width:2.5;stroke-linejoin:round;filter:drop-shadow(0 0 4px rgba(255,159,67,.6))}
+.sim-ds .l-sens-fill{fill:var(--s-sens);fill-opacity:.12}
+.sim-note{margin:0;font-size:.8rem;color:var(--txt-dim)}
+.sim-read{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;border-top:1px solid var(--line);padding-top:10px}
+.sim-read div{display:grid;gap:2px}.sim-read small{font-size:.74rem;color:var(--txt-dim)}
+.sim-read b{font-size:1.1rem;color:var(--accent);font-variant-numeric:tabular-nums;text-shadow:0 0 10px rgba(var(--accent-rgb),.35)}
+.sim-warn{margin:0;font-size:.82rem;color:#ffb36b;min-height:0}
+@media (max-width:900px){.sim-ds{grid-template-columns:minmax(0,1fr);padding:14px}.sim-read{grid-template-columns:1fr 1fr}}
+.sim-ds{grid-template-columns:280px minmax(0,1fr)}
+.sim-ctl,.sim-l{min-width:0}
+.sim-ds select{width:100%;max-width:100%;min-width:0;text-overflow:ellipsis}
+@media (max-width:900px){.sim-ds{grid-template-columns:minmax(0,1fr)}}
+.sim-ds select{font-size:.76rem;padding:7px 6px}
