@@ -15,13 +15,32 @@ const I18N = {
   fr:{accueil:'Accueil', mesScripts:'Mes scripts', ouvrir:'Ouvrir le guide →', bientot:'Bientôt disponible', surPage:'Sur cette page',
       prec:'← Précédent', suiv:'Suivant →', haut:'Remonter en haut', rech:'Rechercher…  ( / )', rechAria:'Rechercher dans le site', rechBtn:'Rechercher',
       aucun:'Aucun résultat pour', menu:'Menu', menuAria:'Menu principal', sousMarque:'Scripts Premium|· Cronus ZEN ·', navHaut:'Présentation', navPatch:'Patch Note', enLigne:'en ligne', membres:'membres', guide:'Guide', langAria:'Langue',
-      enCours:'🚧 Traduction en cours : cette page n’est pas encore traduite.', copier:'Copier le lien', copie:'Lien copié !', copierAide:'Copier le lien de cette page pour le partager (Discord…)'},
+      enCours:'🚧 Traduction en cours : cette page n’est pas encore traduite.', copier:'Copier le lien', oledTaille:'Essai : taille de l’écran', oledPause:'Pause', oledLecture:'Lecture', copie:'Lien copié !', copierAide:'Copier le lien de cette page pour le partager (Discord…)'},
   en:{accueil:'Home', mesScripts:'My scripts', ouvrir:'Open the guide →', bientot:'Coming soon', surPage:'On this page',
       prec:'← Previous', suiv:'Next →', haut:'Back to top', rech:'Search…  ( / )', rechAria:'Search the site', rechBtn:'Search',
       aucun:'No results for', menu:'Menu', menuAria:'Main menu', sousMarque:'Premium Scripts|· Cronus ZEN ·', navHaut:'Overview', navPatch:'Patch Note', enLigne:'online', membres:'members', guide:'Guide', langAria:'Language',
-      enCours:'🚧 Translation in progress: this page has not been translated yet.', copier:'Copy link', copie:'Link copied!', copierAide:'Copy the link to this page to share it (Discord…)'}
+      enCours:'🚧 Translation in progress: this page has not been translated yet.', copier:'Copy link', oledTaille:'Test: screen size', oledPause:'Pause', oledLecture:'Play', copie:'Link copied!', copierAide:'Copy the link to this page to share it (Discord…)'}
 };
 function T(k){ return (I18N[LANG] || I18N.fr)[k]; }
+
+// ---- Écrans OLED animés (images 128x64 fabriquées par outils/oled/ecrans.py) ----
+const OLED_BTN = {UP:'▲ UP', DOWN:'▼ DOWN', LEFT:'◀ LEFT', RIGHT:'▶ RIGHT', TRIANGLE:'△ TRIANGLE / Y', CROSS:'✕ CROSS / A', CIRCLE:'○ CIRCLE / B', R1:'R1 / RB', L2:'L2 / LT', OPTIONS:'OPTIONS / MENU', PS:'PS / XBOX', SHARE:'SHARE / VIEW'};
+function oledHTML(id){
+  const d=(window.OLED_DATA||{})[id]; if(!d) return '';
+  return `<div class="oled" data-oled="${esc(id)}"><div class="oled-ecran"><canvas width="128" height="64" aria-label="OLED"></canvas></div>
+    <div class="oled-btns">${d.btns.map(b=>`<span class="oled-btn" data-b="${b}">${OLED_BTN[b]||b}</span>`).join('')}</div></div>`;
+}
+function oledInit(el){
+  if(el.dataset.init) return; el.dataset.init='1';
+  const d=(window.OLED_DATA||{})[el.dataset.oled]; if(!d) return;
+  const cv=el.querySelector('canvas'), cx=cv.getContext('2d'), img=new Image(); img.src=d.sprite;
+  const btns=[...el.querySelectorAll('.oled-btn')]; let k=0, timer=null, vu=false;
+  function dessine(){ const [f,ms,enf]=d.seq[k]; cx.clearRect(0,0,128,64); cx.drawImage(img,0,f*64,128,64,0,0,128,64);
+    const p=cx.getImageData(0,0,128,64), q=p.data; for(let i=0;i<q.length;i+=4){ const on=q[i]>127; q[i]=q[i+1]=q[i+2]=on?255:0; q[i+3]=255; } cx.putImageData(p,0,0);
+    btns.forEach(b=>b.classList.toggle('on', enf.includes(b.dataset.b))); return ms; }
+  function suite(){ if(!vu) { timer=null; return; } const ms=dessine(); k=(k+1)%d.seq.length; timer=setTimeout(suite, ms); }
+  img.onload=()=>{ dessine(); new IntersectionObserver(es=>es.forEach(e=>{ vu=e.isIntersecting; if(vu && !timer) suite(); }),{threshold:.2}).observe(el); };
+}
 
 // ---- Simulateur Dynamic Sens (meme logique que le script : un pas = 10 ms) ----
 const DS_TXT = {
@@ -418,6 +437,12 @@ function renderBloc(b, ctx){
       html = `<div class="img-row">${(b.images||[]).map(im=>`<div class="b-card b-card-image"><img class="card-image-full" src="${esc(A(im.image))}" alt="${esc(im.alt||'Illustration')}" loading="lazy"></div>`).join('')}</div>`;
       break;
     }
+    case 'etapeoled':
+      html = `<div class="etape-oled"><div class="eo-txt"><div class="eo-titre">${touches(b.titre||'')}</div>${(b.contenu||'').split(/\n\n+/).map(p=>`<p>${touches(p)}</p>`).join('')}</div>${oledHTML(b.oled)}</div>`;
+      break;
+    case 'oledtaille':
+      html = `<div class="oled-taille"><span>${T('oledTaille')}</span>${[2,3].map(k=>`<button type="button" data-zoom="${k}">×${k}</button>`).join('')}</div>`;
+      break;
     case 'simulateur':
       html = b.sim==='dynamic-sens' ? simDSHTML() : '';
       break;
@@ -1054,6 +1079,7 @@ function sBuild(){
         case 'carte': add({...c, text:(b.titre?b.titre+'. ':'')+(b.contenu||'')}); if(b.blocs) walk(b.blocs, c); break;
         case 'modbody': { const m=modById(b.mod); if(m) walk(m.blocs, c); break; }
         case 'groupe': case 'encadre': walk(b.blocs, c); break;
+        case 'etapeoled': add({...c, text:b.titre+'. '+(b.contenu||'')}); break;
         case 'duo': (b.cartes||[]).forEach(k=>{ add({...c, text:k.titre}); walk(k.blocs, c); }); break;
         case 'tuiles': (b.tuiles||[]).forEach(k=>{ add({...c, text:k.titre+'. '+(k.contenu||'')}); walk(k.blocs, c); }); break;
         case 'etapes': if(Array.isArray(b.etapes)) b.etapes.forEach(k=>{ add({...c, text:(k.titre?k.titre+'. ':'')+(k.contenu||'')}); walk(k.blocs, c); }); else add({...c, text:b.contenu}); break;
@@ -1433,3 +1459,7 @@ document.addEventListener('click', e=>{
 });
 
 new MutationObserver(()=>document.querySelectorAll('.sim-ds:not([data-init])').forEach(simDSInit)).observe(document.documentElement,{childList:true,subtree:true});
+
+new MutationObserver(()=>document.querySelectorAll('.oled:not([data-init])').forEach(oledInit)).observe(document.documentElement,{childList:true,subtree:true});
+document.addEventListener('click',e=>{ const b=e.target.closest && e.target.closest('.oled-taille [data-zoom]'); if(!b) return;
+  document.documentElement.style.setProperty('--oled-zoom', b.dataset.zoom); document.querySelectorAll('.oled-taille [data-zoom]').forEach(x=>x.classList.toggle('on', x===b)); });

@@ -654,3 +654,19 @@ main .bloc-wrap, main details, main summary, main .mod-fiche{scroll-margin-top:8
 .sim-ds select{width:100%;max-width:100%;min-width:0;text-overflow:ellipsis}
 @media (max-width:900px){.sim-ds{grid-template-columns:minmax(0,1fr)}}
 .sim-ds select{font-size:.76rem;padding:7px 6px}
+
+/* ---- Étapes avec écran OLED animé ---- */
+:root{--oled-zoom:2}
+.etape-oled{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:22px;align-items:center;margin:14px 0;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:rgba(var(--accent-rgb),.04)}
+.eo-titre{font-weight:800;font-size:1.02rem;margin-bottom:6px;color:var(--txt)}
+.eo-txt p{margin:0 0 8px;color:var(--txt-dim);line-height:1.6}.eo-txt p:last-child{margin-bottom:0}
+.oled{display:grid;justify-items:center;gap:10px}
+.oled-ecran{padding:8px;border-radius:12px;background:#000;border:1px solid rgba(var(--accent-rgb),.45);box-shadow:0 0 14px rgba(var(--accent-rgb),.22),inset 0 0 12px rgba(var(--accent-rgb),.08)}
+.oled canvas{display:block;width:calc(128px * var(--oled-zoom));height:calc(64px * var(--oled-zoom));image-rendering:pixelated;image-rendering:crisp-edges;max-width:100%}
+.oled-btns{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:calc(128px * var(--oled-zoom) + 18px)}
+.oled-btn{font-size:.74rem;font-weight:800;letter-spacing:.3px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);color:var(--txt-dim);background:rgba(var(--accent-rgb),.05);transition:background .08s,color .08s,box-shadow .08s}
+.oled-btn.on{color:#06101f;background:var(--accent);border-color:var(--accent);box-shadow:0 0 14px rgba(var(--accent-rgb),.7)}
+.oled-taille{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:.82rem;color:var(--txt-dim)}
+.oled-taille button{font:inherit;font-weight:700;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(var(--accent-rgb),.06);color:var(--txt);cursor:pointer}
+.oled-taille button.on{border-color:var(--accent);background:rgba(var(--accent-rgb),.2)}
+@media (max-width:820px){.etape-oled{grid-template-columns:minmax(0,1fr)}.oled canvas{width:min(calc(128px * var(--oled-zoom)),100%);height:auto;aspect-ratio:2/1}}
