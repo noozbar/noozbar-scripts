@@ -519,6 +519,12 @@ function renderBloc(b, ctx){
       html = '<div class="duo">' + (b.cartes||[]).map(c=>`<div class="duo-carte duo-${esc(c.couleur||'vert')}"><div class="duo-titre">${touches(c.titre||'')}</div>${(c.blocs||[]).map(x=>renderBloc(x,ctx)).join('')}</div>`).join('') + '</div>';
       break;
     }
+    case 'versions':{
+      const secs=[]; const c=(b.items||[]).map((u,i)=>{ secs.push(`<div class="mf-sec" data-sec="${i}" hidden>${(u.blocs||[]).map(x=>renderBloc(x,ctx)).join('')}</div>`);
+        return `<button type="button" class="mf-chip" data-sec="${i}" aria-expanded="false">${touches(u.titre||'')}</button>`; }).join('');
+      html = `<section class="mod-fiche versions" id="${esc(b.id||'versions')}"><div class="mf-chips">${c}</div><div class="mf-panel">${secs.join('')}</div></section>`;
+      break;
+    }
     case 'tuiles':{
       const secs=[]; const t=(b.tuiles||[]).map((u,i)=>{ secs.push(`<div class="mf-sec" data-sec="${i}" hidden>${(u.blocs||[]).map(x=>renderBloc(x,ctx)).join('')}</div>`);
         return `<button type="button" class="mf-chip tl-tuile" data-sec="${i}" aria-expanded="false"><span class="tl-ic" aria-hidden="true">${esc(u.icone||'')}</span><span class="tl-titre">${touches(u.titre||'')}</span><span class="tl-txt">${touches(u.contenu||'')}</span><span class="tl-plus" aria-hidden="true"></span></button>`; }).join('');
